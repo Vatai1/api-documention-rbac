@@ -3,7 +3,8 @@
  * Хранилище — PostgreSQL (Docker: api-portal-pg, localhost:5433, база api_portal).
  * Модель держится в памяти, после каждой мутации — полная синхронизация в PG (транзакция).
  * Первая миграция: данные из data.json импортируются автоматически.
- * JWT-авторизация, RBAC. Сидинг: админ + ГИС ЕКС API из openapi_spec.json.
+ * JWT-авторизация, RBAC. Первый запуск: пароль администратора устанавливается
+ * при первом входе через экран первичной настройки (без демо-доступа).
  */
 import express from 'express'
 import cors from 'cors'
@@ -228,88 +229,105 @@ function collectAncestorIds(api, fid, set) {
   return set
 }
 
-// ── Сидинг ──
-function seed() {
-  const raw = readFileSync(join(__dirname, '..', 'openapi_spec.json'), 'utf-8')
-  const spec = JSON.parse(raw)
-
-  // Группируем эндпоинты по тегам
-  const groups = {}
-  for (const [path, methods] of Object.entries(spec.paths || {})) {
-    for (const [method, detail] of Object.entries(methods)) {
-      if (!['get','post','put','delete','patch'].includes(method)) continue
-      const tags = detail.tags || ['Без категории']
-      for (const tag of tags) {
-        if (!groups[tag]) groups[tag] = []
-        groups[tag].push({
-          id: nextId(Object.values(groups).flat()),
-          method: method.toUpperCase(),
-          path,
-          summary: detail.summary || '',
-          description: detail.description || '',
-          operationId: detail.operationId || '',
-          parameters: detail.parameters || [],
-          requestBody: detail.requestBody || null,
-          responses: detail.responses || {}
-        })
-      }
-    }
-  }
-
-  const pwdHash = bcrypt.hashSync('admin12345', 10)
-
-  const api = {
+// ── Сидинг (первый запуск): админ без пароля (устанавливается при первом входе) ──
+function pendingAdmin() {
+  return {
     id: 1,
-    name: 'eks-api-2025',
-    title: spec.info.title,
-    version: spec.info.version || '1.0',
-    description: spec.info.description || '',
-    server_url: spec.servers?.[0]?.url || '',
-    swagger_url: '/eks-api-swagger-2025.html',
-    groups: groups,
+    username: 'admin',
+    password: '',  // пустой пароль = ждёт установки через /api/auth/setup
+    email: 'admin@local',
+    fullName: 'Администратор',
+    is_admin: true,
     created_at: new Date().toISOString()
   }
-  migrateApi(api)
+}
 
-  const db = {
-    users: [{
+function seed() {
+  const db = { users: [pendingAdmin()], apis: [], globalFolders: [], permissions: [] }
+
+  let spec = null
+  try {
+    const specPath = join(__dirname, 'openapi.json')
+    if (existsSync(specPath)) spec = JSON.parse(readFileSync(specPath, 'utf-8'))
+  } catch (e) {
+    console.error('Не удалось прочитать openapi.json:', e.message)
+  }
+
+  if (spec && spec.paths) {
+    // Группируем эндпоинты по тегам
+    const groups = {}
+    for (const [path, methods] of Object.entries(spec.paths)) {
+      for (const [method, detail] of Object.entries(methods)) {
+        if (!['get','post','put','delete','patch'].includes(method)) continue
+        const tags = detail.tags || ['Без категории']
+        for (const tag of tags) {
+          if (!groups[tag]) groups[tag] = []
+          groups[tag].push({
+            id: nextId(Object.values(groups).flat()),
+            method: method.toUpperCase(),
+            path,
+            summary: detail.summary || '',
+            description: detail.description || '',
+            operationId: detail.operationId || '',
+            parameters: detail.parameters || [],
+            requestBody: detail.requestBody || null,
+            responses: detail.responses || {}
+          })
+        }
+      }
+    }
+
+    const api = {
       id: 1,
-      username: 'admin',
-      password: pwdHash,
-      email: 'admin@eks.local',
-      fullName: 'Администратор',
-      is_admin: true,
+      name: 'eks-api-2025',
+      title: spec.info?.title || 'API',
+      version: spec.info?.version || '1.0',
+      description: spec.info?.description || '',
+      server_url: spec.servers?.[0]?.url || '',
+      swagger_url: '/eks-api-swagger-2025.html',
+      groups: groups,
       created_at: new Date().toISOString()
-    }],
-    apis: [api],
-    permissions: []  // { user_id, api_id, folder_ids: null(полный доступ) | [id], endpoint_ids: [] }
+    }
+    migrateApi(api)
+    db.apis.push(api)
   }
 
   saveDB(db)
-  console.log(`✅ Сидинг: 1 админ (admin/admin12345), 1 API (${api.endpoints.length} эндпоинтов, ${api.folders.length} папок)`)
+  console.log(`✅ Сидинг: админ без пароля (установите при первом входе), ${db.apis.length} API`)
   return db
 }
 
-// ── Старт: схема → загрузка из PG → (первая миграция из data.json) → сидинг ──
+// ── Старт: схема → загрузка из PG → (импорт API из data.json) → сидинг ──
 await initSchema()
 let db = await loadFromPg()
 if (db) {
   console.log('🐘 Данные загружены из PostgreSQL')
+  // Демо-доступ отключён: сбрасываем известный демо-пароль администратора
+  let demoReset = false
+  for (const u of db.users) {
+    if (u.is_admin && u.password && bcrypt.compareSync('admin12345', u.password)) {
+      u.password = ''
+      demoReset = true
+    }
+  }
+  if (demoReset) {
+    saveDB(db)
+    console.log('🔑 Обнаружен демо-пароль администратора — сброшен, установите новый при первом входе')
+  }
 } else {
   const fileDb = loadFileDb()
-  if (fileDb && fileDb.users?.length) {
+  if (fileDb && (fileDb.apis?.length || fileDb.users?.length)) {
+    // Импортируем контент (API, папки); пользователи не переносятся —
+    // админ создаётся без пароля и настраивается при первом входе
     db = {
-      users: fileDb.users,
+      users: [pendingAdmin()],
       apis: fileDb.apis || [],
       globalFolders: fileDb.globalFolders || [],
-      permissions: (fileDb.permissions || []).map(p => ({
-        user_id: p.user_id, api_id: p.api_id,
-        folder_ids: p.folder_ids ?? null, endpoint_ids: p.endpoint_ids || []
-      }))
+      permissions: []
     }
     for (const api of db.apis) migrateApi(api)
     saveDB(db)
-    console.log(`📦 Импорт из data.json → PostgreSQL: ${db.users.length} польз., ${db.apis.length} API`)
+    console.log(`📦 Импорт из data.json → PostgreSQL: ${db.apis.length} API (пользователи не переносятся)`)
   } else {
     console.log('База пуста — выполняю сидинг...')
     db = seed()
@@ -387,13 +405,47 @@ function audit(userId, username, action, details = {}) {
 }
 
 // ── AUTH ──
+// Требуется ли первичная настройка (нет админа с установленным паролем)
+function setupRequired() {
+  return !db.users.some(u => u.is_admin && u.password)
+}
+
+app.get('/api/auth/status', (req, res) => {
+  res.json({ setup_required: setupRequired() })
+})
+
+// Первый вход: установка пароля администратора
+app.post('/api/auth/setup', (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || ''
+  if (!rateLimit(`setup:${ip}`, 10, 10 * 60 * 1000))
+    return res.status(429).json({ error: 'Слишком много попыток. Повторите через 10 минут.' })
+  if (!setupRequired())
+    return res.status(403).json({ error: 'Пароль администратора уже установлен' })
+  const { password } = req.body || {}
+  if (typeof password !== 'string' || password.length < 8)
+    return res.status(400).json({ error: 'Пароль должен быть не короче 8 символов' })
+  let admin = db.users.find(u => u.is_admin)
+  if (!admin) {
+    admin = { ...pendingAdmin(), id: nextId(db.users) }
+    db.users.push(admin)
+  }
+  admin.password = bcrypt.hashSync(password, 10)
+  saveDB(db)
+  audit(admin.id, admin.username, 'admin_setup', { ip })
+  const token = jwt.sign({ id: admin.id, username: admin.username }, SECRET, { expiresIn: '24h' })
+  res.json({
+    token,
+    user: { id: admin.id, username: admin.username, email: admin.email, fullName: admin.fullName, is_admin: admin.is_admin, favorites: admin.favorites || [] }
+  })
+})
+
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body
   const ip = req.ip || req.socket?.remoteAddress || ''
   if (!rateLimit(`login:${ip}:${username}`, 8, 10 * 60 * 1000))
     return res.status(429).json({ error: 'Слишком много попыток входа. Повторите через 10 минут.' })
   const user = db.users.find(u => u.username === username)
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  if (!user || !user.password || !bcrypt.compareSync(password, user.password)) {
     audit(null, String(username || ''), 'login_failed', { ip })
     return res.status(401).json({ error: 'Неверный логин или пароль' })
   }
@@ -818,6 +870,8 @@ app.post('/api/admin/users', auth, adminOnly, (req, res) => {
   const { username, password, email, fullName, is_admin } = req.body
   if (db.users.find(u => u.username === username))
     return res.status(409).json({ error: 'Пользователь уже существует' })
+  if (typeof password !== 'string' || password.length < 8)
+    return res.status(400).json({ error: 'Пароль должен быть не короче 8 символов' })
   const user = {
     id: nextId(db.users),
     username, password: bcrypt.hashSync(password, 10),

@@ -51,7 +51,6 @@ function Login({ onLogin }) {
         <input type="password" placeholder="Пароль" value={password}
           onChange={e => setPassword(e.target.value)} required />
         <button type="submit" disabled={loading}>{loading ? '...' : 'Войти'}</button>
-        <p className="hint">Демо: <b>admin</b> / <b>admin12345</b></p>
       </form>
     </div>
   )

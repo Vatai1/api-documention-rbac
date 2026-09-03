@@ -38,7 +38,6 @@ export default function Login({ onLogin }) {
         <button type="submit" disabled={loading}>
           {loading ? '...' : 'Войти'}
         </button>
-        <p className="hint">Демо: <b>admin</b> / <b>admin12345</b></p>
       </form>
     </div>
   )

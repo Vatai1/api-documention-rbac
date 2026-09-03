@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { getToken, setToken, getMe } from './api.js'
+import { getToken, setToken, getMe, getAuthStatus } from './api.js'
 import { subscribe } from './toast.js'
 import Login from './Login.jsx'
+import Setup from './Setup.jsx'
 import Portal from './Portal.jsx'
 import Admin from './Admin.jsx'
 import HotkeysModal from './HotkeysModal.jsx'
@@ -68,6 +69,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [page, setPage] = useState(getPageFromPath)   // 'portal' | 'admin' — из URL
   const [checked, setChecked] = useState(false)
+  const [setupRequired, setSetupRequired] = useState(false)
   const [error, setError] = useState('')
   const [theme, setTheme] = useState(getInitialTheme)
   const [helpOpen, setHelpOpen] = useState(false)
@@ -106,10 +108,21 @@ export default function App() {
   }, [])
 
   const checkAuth = useCallback(async () => {
-    if (!getToken()) { setUser(null); setChecked(true); return }
+    if (!getToken()) {
+      setUser(null)
+      try {
+        const st = await getAuthStatus()
+        setSetupRequired(!!st.setup_required)
+      } catch {
+        setSetupRequired(false)
+      }
+      setChecked(true)
+      return
+    }
     try {
       const me = await getMe()
       setUser(me)
+      setSetupRequired(false)
     } catch {
       setToken(null)
       setUser(null)
@@ -127,7 +140,12 @@ export default function App() {
   }
 
   if (!checked) return <AppSkeleton />
-  if (!user) return <><Login onLogin={checkAuth} /><Toaster /></>
+  if (!user) return <>
+    {setupRequired
+      ? <Setup onDone={checkAuth} />
+      : <Login onLogin={checkAuth} />}
+    <Toaster />
+  </>
 
   const isAdminRoute = page === 'admin'
 

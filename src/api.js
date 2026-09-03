@@ -31,6 +31,21 @@ export async function getMe() {
   return request('/auth/me')
 }
 
+// Статус первичной настройки (public)
+export async function getAuthStatus() {
+  return request('/auth/status')
+}
+
+// Первый вход: установка пароля администратора
+export async function setupAdmin(password) {
+  const data = await request('/auth/setup', {
+    method: 'POST',
+    body: JSON.stringify({ password })
+  })
+  setToken(data.token)
+  return data.user
+}
+
 // ── APIs ──
 export const getApis = () => request('/apis')
 export const getApi = (id) => request(`/apis/${id}`)
