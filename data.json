@@ -1,0 +1,1736 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2b$12$sHvDIFPQmSGnONCvGGjF4eZrvwo2pUJ.sDekCyrEGoSrfbx3IdzWW",
+      "email": "admin@eks.local",
+      "fullName": "Администратор",
+      "is_admin": true,
+      "created_at": "2026-07-22T16:24:05.181120"
+    },
+    {
+      "id": 2,
+      "username": "viewer1",
+      "password": "$2b$12$kF53oL6KOocTnCtMAbx2VOOfZb1QX9O.KNGlT4p9IoP7CQ4punsPK",
+      "email": "test@test.com",
+      "fullName": "Тест Вьювер",
+      "is_admin": false,
+      "created_at": "2026-07-22T16:26:16.236366"
+    },
+    {
+      "id": 3,
+      "username": "asd",
+      "password": "$2b$12$6rlUhnTFNTVjoxHR.hby1OUK8/WRhj2VDqsomvdVXUiV.LhDO.i42",
+      "email": "vatai@123.riu",
+      "fullName": "asdasd",
+      "is_admin": false,
+      "created_at": "2026-07-22T16:37:07.077993"
+    },
+    {
+      "id": 4,
+      "username": "test",
+      "password": "$2a$10$JNW1n23RP/MEIKW0dYIJAuZtOWyKfFdJH3v6ClO2uA5EL3pr8oCwu",
+      "email": "",
+      "fullName": "test",
+      "is_admin": false,
+      "created_at": "2026-09-02T01:12:13.308Z"
+    },
+    {
+      "id": 5,
+      "username": "test1",
+      "password": "$2a$10$4MlAl370DdUfcpIAX2N/ZO5D7MakX.ExGZAg6UVku2CHkR6y9pQTa",
+      "email": "",
+      "fullName": "test1",
+      "is_admin": false,
+      "created_at": "2026-09-02T03:29:54.470Z"
+    }
+  ],
+  "apis": [
+    {
+      "id": 1,
+      "name": "111",
+      "title": "1111",
+      "version": "1.0",
+      "description": "",
+      "server_url": "",
+      "swagger_url": "",
+      "created_at": "2026-09-01T23:47:12.090Z",
+      "folders": [
+        {
+          "id": 1,
+          "name": "вфждл",
+          "parent_id": null,
+          "order": 1
+        },
+        {
+          "id": 2,
+          "name": "Заявления и карты",
+          "parent_id": null,
+          "order": 3
+        },
+        {
+          "id": 3,
+          "name": "Настройки",
+          "parent_id": null,
+          "order": 4
+        },
+        {
+          "id": 4,
+          "name": "Библиотека",
+          "parent_id": null,
+          "order": 2
+        }
+      ],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/user/identify",
+          "summary": "userIdentify — Проверка существования зарегистрированного пользователя",
+          "description": "Проверка на основании персональных данных, зарегистрирован ли гражданин в ГИС ЕКС в качестве пользователя, и передача его уникального идентификатора во внешние системы.",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdentifyRequest"
+                },
+                "example": {
+                  "birthDate": "02.04.1999",
+                  "snils": "80145145962"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserIdentifyResponse"
+                  },
+                  "example": {
+                    "persId": "380190117"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Не передан обязательный параметр запроса"
+            },
+            "403": {
+              "description": "Пользователь ГИС ЕКС с указанными данными не найден"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 1,
+          "folder_id": 4
+        },
+        {
+          "method": "POST",
+          "path": "/user/profile/auth",
+          "summary": "userProfile — Получение данных профиля пользователя",
+          "description": "Передача персональных и иных данных пользователя, хранящихся в ГИС ЕКС, во внешние системы.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "query",
+              "required": true,
+              "description": "Уникальный идентификатор пользователя в ГИС ЕКС",
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserProfileResponse"
+                  },
+                  "example": {
+                    "persId": 396696586,
+                    "cards": null,
+                    "mainData": {
+                      "lastName": "Уманова",
+                      "firstName": "Виолета",
+                      "middleName": "Сергеевна",
+                      "gender": 0,
+                      "birthDate": "22.07.2005",
+                      "birthPlace": "Ноглики",
+                      "snils": "574-021-514 63",
+                      "citizenship": 1
+                    },
+                    "document": {
+                      "docType": 1,
+                      "series": "3333",
+                      "number": "970009",
+                      "issueDate": "19.11.1997",
+                      "issuedBy": "УВД Ноглики",
+                      "issueCode": "557-528"
+                    },
+                    "contacts": {
+                      "regAddress": "693000, Южно-Сахалинск, Южно-Сахалинск, ул. Ленина, 80, 17",
+                      "factAddress": "693000, Южно-Сахалинск, Южно-Сахалинск, ул. Пуркаева, 82, 22",
+                      "mobilePhone": "+7 (488) 065-10-00",
+                      "email": "ma20070@mail.com",
+                      "emailAccept": true
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 2,
+          "folder_id": 4
+        },
+        {
+          "method": "POST",
+          "path": "/user/profile/change",
+          "summary": "changeProfile — Изменение данных профиля пользователя",
+          "description": "Редактирование данных профиля пользователя ГИС ЕКС со стороны внешних систем. В теле запроса передаются только те данные, которые необходимо изменить.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "query",
+              "required": true,
+              "description": "Идентификатор пользователя",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileChangeRequest"
+                },
+                "example": {
+                  "document": {
+                    "docType": 1,
+                    "series": "3333",
+                    "number": "970009",
+                    "issueDate": "19.11.1997",
+                    "issuedBy": "УВД Ноглики",
+                    "issueCode": "557-528"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "202": {
+              "description": "Успешная обработка запроса"
+            },
+            "404": {
+              "description": "Пользователь с указанным идентификатором не найден"
+            },
+            "416": {
+              "description": "Переданы недопустимые значения, не соответствующие регламенту взаимодействия (невалидные значения в параметрах тела запроса)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 3,
+          "folder_id": 4
+        },
+        {
+          "method": "POST",
+          "path": "/user/profile/transferConsent",
+          "summary": "transferConsentRequest — Получение согласия на передачу данных",
+          "description": "Получение согласия пользователя на передачу данных со стороны внешних систем.",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferConsentRequest"
+                },
+                "example": {
+                  "birthDate": "11.10.2001",
+                  "snils": "67147146305",
+                  "transferConsent": true
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса"
+            },
+            "403": {
+              "description": "Пользователь с указанными данными не зарегистрирован в ГИС ЕКС"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 4,
+          "folder_id": 4
+        },
+        {
+          "method": "POST",
+          "path": "/claims/create",
+          "summary": "claimsCreate — Создание заявления на подключение карты",
+          "description": "Передача заявления на подключение карты в качестве ЕКС со стороны внешних систем.",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Claim"
+                },
+                "example": {
+                  "cardInfo": {
+                    "cardNumber": "2200380143517817",
+                    "dateTo": "07/29"
+                  },
+                  "mainData": {
+                    "lastName": "Уманова",
+                    "firstName": "Виолета",
+                    "middleName": "Сергеевна",
+                    "gender": 0,
+                    "birthDate": "22.07.2005",
+                    "birthPlace": "Ноглики",
+                    "snils": "57402151463",
+                    "citizenship": 1
+                  },
+                  "document": {
+                    "docType": 1,
+                    "series": "3333",
+                    "number": "970009",
+                    "issueDate": "19.11.1997",
+                    "issuedBy": "УВД Ноглики",
+                    "issueCode": "557-528"
+                  },
+                  "contacts": {
+                    "regAddress": "693000, Южно-Сахалинск, Южно-Сахалинск, ул. Ленина, 80, 17",
+                    "factAddress": "693000, Южно-Сахалинск, Южно-Сахалинск, ул. Пуркаева, 82, 22",
+                    "mobilePhone": "+7 (488) 065-10-00",
+                    "email": "ma20070@mail.com",
+                    "emailAccept": true
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ClaimResponse"
+                  },
+                  "example": {
+                    "formNumber": "E-30072024-3",
+                    "persId": "396725279",
+                    "qrData": "9643100422172259841",
+                    "bskNum": "4A405E5537C327696F3D8CB5C83B77DE1607EB29"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "У пользователя уже есть карта, которая используется в качестве Единой карты жителя"
+            },
+            "409": {
+              "description": "Данный запрос уже обрабатывается (повторный запрос на регистрацию карты для одного пользователя)"
+            },
+            "410": {
+              "description": "Номер СНИЛС уже используется"
+            },
+            "416": {
+              "description": "Переданы недопустимые значения, несоответствующие регламенту взаимодействия (в параметрах gender, citizenship)"
+            },
+            "422": {
+              "description": "Карта уже используется в качестве Единой карты жителя (карта привязана к другому пользователю ГИС ЕКС)"
+            },
+            "431": {
+              "description": "Некорректный адрес регистрации и (или) пользователь не зарегистрирован или не проживает в Сахалинской области"
+            },
+            "451": {
+              "description": "Номер не подходит по формату номеров карт ПС «Мир» (номер карты не проходит валидацию)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 5,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/user/cards/list/{persId}",
+          "summary": "cardsList — Получение списка карт",
+          "description": "Передача данных о всех картах, когда-либо зарегистрированных в качестве ЕКС конкретным пользователем.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "path",
+              "required": true,
+              "description": "Идентификатор пользователя",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса. Возвращается массив данных о картах.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CardData"
+                    }
+                  },
+                  "example": [
+                    {
+                      "cardNumber": "2048",
+                      "qrData": "9643100422172259841",
+                      "bskNum": "4A405E5537C327696F3D8CB5C83B77DE1607EB29",
+                      "status": 5,
+                      "comment": "Единая карта Сахалинца активна",
+                      "modifiedDate": "30.07.2024",
+                      "bankBik": "044525111",
+                      "connectType": "e",
+                      "integrationStatus": {
+                        "loyalty": 2,
+                        "transport": 2,
+                        "culture": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "403": {
+              "description": "Данные пользователя не найдены (пользователь с указанным идентификатором не зарегистрирован в ГИС ЕКС)"
+            },
+            "404": {
+              "description": "Пользователь не имеет Единых карт Сахалинца (пользователь зарегистрирован в ГИС ЕКС, но у него нет карт/заявлений)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках обработки)"
+            }
+          },
+          "id": 6,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/claims/cardNumber/check/{cardNumber}",
+          "summary": "checkCardNumber — Проверка возможности подключения карты",
+          "description": "Проверка разрешения на подключение конкретной банковской карты в качестве ЕКС.",
+          "parameters": [
+            {
+              "name": "cardNumber",
+              "in": "path",
+              "required": true,
+              "description": "Номер банковской карты",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Действующей карты с таким номером не найдено (успешная обработка запроса)"
+            },
+            "403": {
+              "description": "Карта заблокирована банком, подключение невозможно (status=6)"
+            },
+            "410": {
+              "description": "Карта уже использовалась в качестве ЕКС, повторное подключение данной карты невозможно (status=9)"
+            },
+            "422": {
+              "description": "Карта уже используется в качестве ЕКС (при проверке действующей ЕКС, status=4/5)"
+            },
+            "451": {
+              "description": "Карта должна быть выпущена одним из банков-партнеров проекта «Единая карта сахалинца»"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 7,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/claims/cards/checkActive/{persId}",
+          "summary": "checkActive — Проверка наличия у пользователя активной ЕКС",
+          "description": "Проверка наличия или отсутствия активных ЕКС у конкретного пользователя.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "path",
+              "required": true,
+              "description": "Идентификатор пользователя",
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Нет активных карт (успешная обработка запроса)"
+            },
+            "422": {
+              "description": "Найдена активная карта (у пользователя есть активная ЕКС)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 8,
+          "folder_id": 2
+        },
+        {
+          "method": "POST",
+          "path": "/claims/cards/statusChange",
+          "summary": "changeStatus — Изменение статуса (отключение) карт",
+          "description": "Передача данных об изменении статуса (отключении) банковских карт со стороны внешних систем.",
+          "parameters": [
+            {
+              "name": "bskNum",
+              "in": "query",
+              "required": true,
+              "description": "Хэшированный номер карты",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": true,
+              "description": "Новый (присваиваемый) статус",
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Статус успешно изменен (успешная обработка запроса)"
+            },
+            "403": {
+              "description": "Невозможно отклонить подключение карты"
+            },
+            "406": {
+              "description": "Изменение статуса не соответствует регламенту"
+            },
+            "410": {
+              "description": "Невозможно заблокировать карту"
+            },
+            "418": {
+              "description": "Для изменения статуса выпущенной банком карты обратитесь в Банк-эмитент"
+            },
+            "422": {
+              "description": "Подключение новой карты невозможно. Для подключения другой карты «МИР» отключите текущую карту или отмените подключение, если карта находится в ожидании"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 9,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/user/barcode/{persId}",
+          "summary": "getBarcode — Получение штрихкода активной ЕКС",
+          "description": "Передача данных штрихового кода ЕКС, в котором закодирован уникальный идентификатор карты в Проекте.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "path",
+              "required": true,
+              "description": "Идентификатор пользователя",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса. Возвращается изображение штрихового кода.",
+              "content": {
+                "image/jpeg": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "У пользователя нет активной карты"
+            },
+            "404": {
+              "description": "Держатель с указанным идентификатором не найден"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 10,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/claims/cardNumber/checkIntegretionStatus/{bskNum}",
+          "summary": "checkIntegrationStatus — Проверка статусов программ лояльности",
+          "description": "Проверка активности льготных программ и программ лояльности (льготный проезд, «сахалинское долголетие», бонусная программа) у конкретной ЕКС. Примечание: в таблице сервисов метод указан как POST, в примере запроса используется GET.",
+          "parameters": [
+            {
+              "name": "bskNum",
+              "in": "path",
+              "required": true,
+              "description": "Хэшированный номер карты",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/IntegrationStatusResponce"
+                  },
+                  "example": {
+                    "loyalty": 0,
+                    "transport": 2,
+                    "culture": 2
+                  }
+                }
+              }
+            },
+            "204": {
+              "description": "Действующей карты с таким номером не найдено"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 11,
+          "folder_id": 2
+        },
+        {
+          "method": "POST",
+          "path": "/user/settings/save",
+          "summary": "saveSettings — Изменение (актуализация) учетных данных",
+          "description": "Актуализация учетных данных пользователя со стороны внешних систем.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "query",
+              "required": true,
+              "description": "Идентификатор пользователя",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveSettingsRequest"
+                },
+                "example": {
+                  "mobilePhone": "+7 (556) 765-14-88",
+                  "email": "ma20070@mail.com",
+                  "emailAccept": false
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": "Выполнено (успешная обработка запроса)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 12,
+          "folder_id": 3
+        },
+        {
+          "method": "GET",
+          "path": "/bis/addReaders/{persId}",
+          "summary": "addReaders — Подключение читательского билета",
+          "description": "Подключение читательского билета к конкретной ЕКС.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "path",
+              "required": true,
+              "description": "Уникальный идентификатор пользователя ГИС ЕКС",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "202": {
+              "description": "Успешная обработка запроса"
+            },
+            "402": {
+              "description": "Билет уже подключен к ЕКС"
+            },
+            "403": {
+              "description": "Карта не активна"
+            },
+            "404": {
+              "description": "Пользователь не найден"
+            },
+            "405": {
+              "description": "Найдено несколько записей с одинаковыми данными"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 13,
+          "folder_id": 4
+        },
+        {
+          "method": "GET",
+          "path": "/bis/readerStatus/{persId}",
+          "summary": "readerStatus — Получение статуса читательского билета",
+          "description": "Получение статуса и данных читательского билета пользователя.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "path",
+              "required": true,
+              "description": "Уникальный идентификатор пользователя ГИС ЕКС",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReaderStatusResponse"
+                  },
+                  "example": {
+                    "card": {
+                      "bskNum": "string",
+                      "lastNumbers": "string"
+                    },
+                    "dateOfFinish": "string",
+                    "status": 0
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Пользователь не найден"
+            },
+            "405": {
+              "description": "Читательский билет не подключен"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 14,
+          "folder_id": 4
+        },
+        {
+          "method": "GET",
+          "path": "/bis/shutdownReaders/{persId}",
+          "summary": "shutdownReaders — Отключение читательского билета",
+          "description": "Отмена привязки читательского билета и ЕКС.",
+          "parameters": [
+            {
+              "name": "persId",
+              "in": "path",
+              "required": true,
+              "description": "Уникальный идентификатор пользователя ГИС ЕКС",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "202": {
+              "description": "Успешная обработка запроса"
+            },
+            "404": {
+              "description": "Пользователь не найден"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 15,
+          "folder_id": 4
+        }
+      ],
+      "folder_id": 1
+    },
+    {
+      "id": 2,
+      "name": "123123",
+      "title": "123123",
+      "version": "2026",
+      "description": "",
+      "server_url": "",
+      "swagger_url": "",
+      "created_at": "2026-09-02T00:42:39.370Z",
+      "folders": [
+        {
+          "id": 1,
+          "name": "Пользователь",
+          "parent_id": null,
+          "order": 1
+        },
+        {
+          "id": 2,
+          "name": "Заявления и карты",
+          "parent_id": null,
+          "order": 2
+        },
+        {
+          "id": 3,
+          "name": "Программы лояльности",
+          "parent_id": null,
+          "order": 3
+        },
+        {
+          "id": 4,
+          "name": "Читательский билет",
+          "parent_id": null,
+          "order": 4
+        },
+        {
+          "id": 5,
+          "name": "Виртуальные карты (НСПК)",
+          "parent_id": null,
+          "order": 5
+        }
+      ],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/user/identify",
+          "summary": "Проверка существования зарегистрированного пользователя",
+          "description": "Проверка на основании персональных данных, зарегистрирован ли гражданин\nв ГИС ЕКС в качестве пользователя, и передача его уникального\nидентификатора во внешние системы.\n",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdentifyRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "birthDate": "02.04.1999",
+                      "snils": "80145145962"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserIdentifyResponse"
+                  },
+                  "examples": {
+                    "default": {
+                      "value": {
+                        "persId": "380190117"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Не передан обязательный параметр запроса"
+            },
+            "403": {
+              "description": "Пользователь ГИС ЕКС с указанными данными не найден"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 1,
+          "folder_id": 1
+        },
+        {
+          "method": "POST",
+          "path": "/user/profile/auth",
+          "summary": "Получение данных профиля пользователя",
+          "description": "Передача персональных и иных данных пользователя, хранящихся в ГИС ЕКС,\nво внешние системы.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdQuery"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserProfileResponse"
+                  },
+                  "examples": {
+                    "default": {
+                      "value": {
+                        "persId": 396696586,
+                        "cards": null,
+                        "mainData": {
+                          "lastName": "Уманова",
+                          "firstName": "Виолета",
+                          "middleName": "Сергеевна",
+                          "gender": 0,
+                          "birthDate": "22.07.2005",
+                          "birthPlace": "Ноглики",
+                          "snils": "574-021-514 63",
+                          "citizenship": 1
+                        },
+                        "document": {
+                          "docType": 1,
+                          "series": "3333",
+                          "number": "970009",
+                          "issueDate": "19.11.1997",
+                          "issuedBy": "УВД Ноглики",
+                          "issueCode": "557-528"
+                        },
+                        "contacts": {
+                          "regAddress": "693000, Южно-Сахалинск, Южно-Сахалинск, ул. Ленина, 80, 17",
+                          "factAddress": "693000, Южно-Сахалинск, Южно-Сахалинск, ул. Пуркаева, 82, 22",
+                          "mobilePhone": "+7 (488) 065-10-00",
+                          "email": "ma20070@mail.com",
+                          "emailAccept": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 2,
+          "folder_id": 1
+        },
+        {
+          "method": "POST",
+          "path": "/user/profile/change",
+          "summary": "Изменение данных профиля пользователя",
+          "description": "Редактирование данных профиля пользователя ГИС ЕКС со стороны внешних\nсистем. В теле запроса передаются только те данные, которые необходимо\nизменить.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdQuery"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileChangeRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "document": {
+                        "docType": 1,
+                        "series": "3333",
+                        "number": "970009",
+                        "issueDate": "19.11.1997",
+                        "issuedBy": "УВД Ноглики",
+                        "issueCode": "557-528"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "202": {
+              "description": "Успешная обработка запроса"
+            },
+            "404": {
+              "description": "Пользователь с указанным идентификатором не найден"
+            },
+            "416": {
+              "description": "Переданы недопустимые значения, не соответствующие регламенту взаимодействия"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 3,
+          "folder_id": 1
+        },
+        {
+          "method": "POST",
+          "path": "/user/settings/save",
+          "summary": "Изменение (актуализация) учётных данных",
+          "description": "Актуализация учётных данных пользователя со стороны внешних систем.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdQuery"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "mobilePhone": "+7 (556) 765-14-88",
+                      "email": "ma20070@mail.com",
+                      "emailAccept": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": "Выполнено (успешная обработка запроса)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 4,
+          "folder_id": 1
+        },
+        {
+          "method": "POST",
+          "path": "/claims/create",
+          "summary": "Создание заявления на подключение карты",
+          "description": "Передача заявления на подключение карты в качестве ЕКС со стороны\nвнешних систем.\n",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsCreateRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "cardInfo": {
+                        "cardNumber": "2200380143517817",
+                        "dateTo": "07/29"
+                      },
+                      "mainData": {
+                        "lastName": "Уманова",
+                        "firstName": "Виолета",
+                        "middleName": "Сергеевна",
+                        "gender": 0,
+                        "birthDate": "22.07.2005",
+                        "birthPlace": "Ноглики",
+                        "snils": "57402151463",
+                        "citizenship": 1
+                      },
+                      "document": {
+                        "docType": 1,
+                        "series": "3333",
+                        "number": "970009",
+                        "issueDate": "19.11.1997",
+                        "issuedBy": "УВД Ноглики",
+                        "issueCode": "557-528"
+                      },
+                      "contacts": {
+                        "regAddress": "693000, Южно-Сахалинск, ул. Ленина, 80, 17",
+                        "factAddress": "693000, Южно-Сахалинск, ул. Пуркаева, 82, 22",
+                        "mobilePhone": "+7 (488) 065-10-00",
+                        "email": "ma20070@mail.com",
+                        "emailAccept": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ClaimResponse"
+                  },
+                  "examples": {
+                    "default": {
+                      "value": {
+                        "formNumber": "E-30072024-3",
+                        "persId": "396725279",
+                        "qrData": "9643100422172259841",
+                        "bskNum": "4A405E5537C327696F3D8CB5C83B77DE1607EB29"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Карта уже используется (привязана к другому пользователю ГИС ЕКС)"
+            },
+            "403": {
+              "description": "У пользователя уже есть карта, которая используется в качестве Единой карты жителя"
+            },
+            "409": {
+              "description": "Данный запрос уже обрабатывается (повторный запрос на регистрацию карты)"
+            },
+            "410": {
+              "description": "Номер СНИЛС уже используется"
+            },
+            "416": {
+              "description": "Переданы недопустимые значения (в параметрах gender, citizenship)"
+            },
+            "451": {
+              "description": "Номер не подходит по формату номеров карт ПС Мир"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 5,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/user/cards/list/{persId}",
+          "summary": "Получение списка карт",
+          "description": "Передача данных о всех картах, когда-либо зарегистрированных в качестве\nЕКС конкретным пользователем.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CardData"
+                    }
+                  },
+                  "examples": {
+                    "default": {
+                      "value": [
+                        {
+                          "cardNumber": "2048",
+                          "qrData": "9643100422172259841",
+                          "bskNum": "4A405E5537C327696F3D8CB5C83B77DE1607EB29",
+                          "status": 5,
+                          "comment": "Единая карта Сахалинца активна",
+                          "modifiedDate": "30.07.2024",
+                          "bankBik": "044525111",
+                          "connectType": "e",
+                          "integrationStatus": {
+                            "loyalty": 2,
+                            "transport": 2,
+                            "culture": 2
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Данные пользователя не найдены (пользователь не зарегистрирован в ГИС ЕКС)"
+            },
+            "404": {
+              "description": "Пользователь не имеет Единых карт Сахалинца"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках обработки)"
+            }
+          },
+          "id": 6,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/claims/cardNumber/check/{cardNumber}",
+          "summary": "Проверка возможности подключения карты",
+          "description": "Проверка разрешения на подключение конкретной банковской карты в\nкачестве ЕКС.\n",
+          "parameters": [
+            {
+              "name": "cardNumber",
+              "in": "path",
+              "required": true,
+              "description": "Номер банковской карты",
+              "schema": {
+                "type": "string"
+              },
+              "example": "22001485790158473"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Действующей карты с таким номером не найдено (успешная обработка)"
+            },
+            "401": {
+              "description": "Карта уже используется в качестве ЕКС (status = 4/5)"
+            },
+            "403": {
+              "description": "Карта заблокирована банком, подключение невозможно (status = 6)"
+            },
+            "410": {
+              "description": "Карта уже использовалась в качестве ЕКС, повторное подключение невозможно (status = 9)"
+            },
+            "451": {
+              "description": "Карта должна быть выпущена одним из банков-партнёров проекта"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых ошибках обработки)"
+            }
+          },
+          "id": 7,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/claims/cards/checkActive/{persId}",
+          "summary": "Проверка наличия у пользователя активной ЕКС",
+          "description": "Проверка наличия или отсутствия активных ЕКС у конкретного пользователя.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Нет активных карт (успешная обработка запроса)"
+            },
+            "401": {
+              "description": "Найдена активная карта (у пользователя есть активная ЕКС)"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 8,
+          "folder_id": 2
+        },
+        {
+          "method": "POST",
+          "path": "/claims/cards/statusChange",
+          "summary": "Изменение статуса (отключение) карт",
+          "description": "Передача данных об изменении статуса (отключении) банковских карт со\nстороны внешних систем.\n",
+          "parameters": [
+            {
+              "name": "bskNum",
+              "in": "query",
+              "required": true,
+              "description": "Хэшированный номер карты",
+              "schema": {
+                "type": "string"
+              },
+              "example": "BD6D89DAD8DCDAF358314C7694F976C458953875"
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": true,
+              "description": "Новый (присваиваемый) статус",
+              "schema": {
+                "type": "integer"
+              },
+              "example": 6
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Статус успешно изменён"
+            },
+            "401": {
+              "description": "Подключение новой карты невозможно"
+            },
+            "403": {
+              "description": "Невозможно отклонить подключение карты"
+            },
+            "406": {
+              "description": "Изменение статуса не соответствует регламенту"
+            },
+            "410": {
+              "description": "Невозможно заблокировать карту"
+            },
+            "418": {
+              "description": "Для изменения статуса выпущенной банком карты обратитесь в Банк-эмитент"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 9,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/user/barcode/{persId}",
+          "summary": "Получение штрих-кода активной ЕКС",
+          "description": "Передача данных штрихового кода ЕКС, в котором закодирован уникальный\nидентификатор карты в Проекте. Возвращает изображение (image/jpeg).\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса — изображение штрихового кода",
+              "content": {
+                "image/jpeg": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "У пользователя нет активной карты"
+            },
+            "404": {
+              "description": "Держатель с указанным идентификатором не найден"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 10,
+          "folder_id": 2
+        },
+        {
+          "method": "GET",
+          "path": "/claims/cardNumber/checkIntegretionStatus/{bskNum}",
+          "summary": "Проверка статусов программ лояльности",
+          "description": "Проверка активности льготных программ и программ лояльности\n(льготный проезд, «сахалинское долголетие», бонусная программа)\nу конкретной ЕКС.\n\nПримечание: в исходном документе в таблице метода указан POST,\nоднако в сводной таблице сервисов и в примере запроса используется GET.\nЗдесь приведён вариант GET, согласованный с примером.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/BskNumPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/IntegrationStatusResponse"
+                  },
+                  "examples": {
+                    "default": {
+                      "value": {
+                        "loyalty": 0,
+                        "transport": 2,
+                        "culture": 2
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Карта не найдена"
+            },
+            "500": {
+              "description": "Ошибка обработки запроса (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 11,
+          "folder_id": 3
+        },
+        {
+          "method": "GET",
+          "path": "/bis/addReaders/{persId}",
+          "summary": "Подключение читательского билета",
+          "description": "Подключение читательского билета к конкретной ЕКС.",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "202": {
+              "description": "Успешная обработка запроса"
+            },
+            "402": {
+              "description": "Карта уже подключена к ЕКС"
+            },
+            "403": {
+              "description": "Карта не активна"
+            },
+            "404": {
+              "description": "Пользователь не найден"
+            },
+            "405": {
+              "description": "Найдено несколько записей с одинаковыми данными"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 12,
+          "folder_id": 4
+        },
+        {
+          "method": "GET",
+          "path": "/bis/readerStatus/{persId}",
+          "summary": "Получение статуса читательского билета",
+          "description": "Получение статуса и данных читательского билета пользователя.",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReaderStatusResponse"
+                  },
+                  "examples": {
+                    "default": {
+                      "value": {
+                        "card": "9071",
+                        "status": "Привязан к карте",
+                        "dateOfFinish": "20241126"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Пользователь не найден"
+            },
+            "405": {
+              "description": "Читательский билет не подключён"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 13,
+          "folder_id": 4
+        },
+        {
+          "method": "GET",
+          "path": "/bis/shutdownReaders/{persId}",
+          "summary": "Отключение читательского билета",
+          "description": "Отмена привязки читательского билета и ЕКС.",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "202": {
+              "description": "Успешная обработка запроса"
+            },
+            "404": {
+              "description": "Пользователь не найден"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 14,
+          "folder_id": 4
+        },
+        {
+          "method": "GET",
+          "path": "/claims/virtualCards/checkActive/{persId}",
+          "summary": "Проверка возможности подключения виртуальной карты",
+          "description": "Проверка наличия активной карты у Держателя перед подключением\nвиртуальной карты.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdPath"
+            }
+          ],
+          "requestBody": null,
+          "responses": {
+            "204": {
+              "description": "Успешная обработка запроса (нет активной карты, подключение возможно)"
+            },
+            "401": {
+              "description": "У Вас имеется активная карта. Отключите её самостоятельно в Личном кабинете"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 15,
+          "folder_id": 5
+        },
+        {
+          "method": "GET",
+          "path": "/claims/virtualCards/nspk/redirect",
+          "summary": "Получение ссылки от НСПК",
+          "description": "Получение от НСПК адреса страницы регистрации карты.\n\nПримечание: в исходном документе для данного GET-метода также определено\nтело запроса (backUrl) — оно передаётся вместе с запросом.\n",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdQuery"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NspkRedirectRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "backUrl": "https://example.com/back"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/NspkRedirectResponse"
+                  },
+                  "examples": {
+                    "default": {
+                      "value": {
+                        "orderUrl": "https://nspk.ru/order/abc123"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Сервис подключения карты временно недоступен (ошибка получения ссылки от НСПК)"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            }
+          },
+          "id": 16,
+          "folder_id": 5
+        },
+        {
+          "method": "POST",
+          "path": "/claims/virtualCards/nspk/confirm",
+          "summary": "Подтверждение регистрации карты в НСПК",
+          "description": "Активация виртуальной карты после получения orderId от НСПК.",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdQuery"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NspkConfirmRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "orderId": "nspk-order-12345"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса"
+            },
+            "404": {
+              "description": "У Вас имеется активная карта (пользователю не разрешено подключение)"
+            },
+            "409": {
+              "description": "Сервис подключения карты временно недоступен (ошибка получения ссылки от НСПК)"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            },
+            "503": {
+              "description": "Не удалось подключить карту (ошибка обработки)"
+            }
+          },
+          "id": 17,
+          "folder_id": 5
+        },
+        {
+          "method": "POST",
+          "path": "/claims/virtualCards/nspk/disconnect",
+          "summary": "Отключение виртуальной карты",
+          "description": "Отключение виртуальной карты (передаётся cardId карты в НСПК).",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/PersIdQuery"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NspkDisconnectRequest"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "cardId": "nspk-card-67890"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Успешная обработка запроса"
+            },
+            "404": {
+              "description": "Карта не найдена"
+            },
+            "409": {
+              "description": "Сервис подключения карты временно недоступен (ошибка сервиса НСПК)"
+            },
+            "500": {
+              "description": "Ошибка (при любых других ошибках сервиса)"
+            },
+            "503": {
+              "description": "Не удалось отключить карту (ошибка обработки)"
+            }
+          },
+          "id": 18,
+          "folder_id": 5
+        }
+      ],
+      "folder_id": null
+    }
+  ],
+  "permissions": [
+    {
+      "user_id": 2,
+      "api_id": 1,
+      "folder_ids": null
+    },
+    {
+      "user_id": 3,
+      "api_id": 1,
+      "folder_ids": [
+        3,
+        2
+      ]
+    },
+    {
+      "user_id": 4,
+      "api_id": 1,
+      "folder_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "user_id": 5,
+      "api_id": 1,
+      "folder_ids": [
+        2,
+        3
+      ]
+    }
+  ],
+  "globalFolders": [
+    {
+      "id": 1,
+      "name": "1231231",
+      "parent_id": null,
+      "order": 1
+    }
+  ]
+}

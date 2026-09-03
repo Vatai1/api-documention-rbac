@@ -1,0 +1,46 @@
+services:
+  pg:
+    image: postgres:16-alpine
+    container_name: api-portal-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal
+      POSTGRES_DB: api_portal
+    ports:
+      - "5433:5432"
+    volumes:
+      - api-portal-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal -d api_portal"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  portal:
+    build:
+      context: .
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: localhost,127.0.0.1
+    container_name: api-portal-app
+    restart: unless-stopped
+    depends_on:
+      pg:
+        condition: service_healthy
+    environment:
+      PGHOST: pg
+      PGPORT: 5432
+      PGUSER: portal
+      PGPASSWORD: portal
+      PGDATABASE: api_portal
+      PORTAL_SECRET: ${PORTAL_SECRET:-change-me-in-production}
+      PORT: 3010
+    ports:
+      - "3010:3010"
+
+volumes:
+  api-portal-pgdata:
+    name: api-portal-pgdata
+    external: true
