@@ -33,12 +33,26 @@ function loadEnvFile() {
 loadEnvFile()
 
 const SECRET = process.env.PORTAL_SECRET || 'eks-portal-secret-2025-dev'
-const PORT = parseInt(process.env.PORT || '3010', 10)
+const PORT = (() => {
+  const n = parseInt(process.env.PORT || '3010', 10)
+  return Number.isFinite(n) && n > 0 && n < 65536 ? n : 3010
+})()
 
 // ── Хранилище: PostgreSQL ──
+function pgPort(defaultPort = 5433) {
+  const raw = process.env.PGPORT
+  if (raw === undefined || raw === '') return defaultPort
+  const n = parseInt(raw, 10)
+  if (!Number.isFinite(n) || n <= 0 || n > 65535) {
+    console.warn(`⚠ Некорректное значение PGPORT «${raw}» — используется порт ${defaultPort}`)
+    return defaultPort
+  }
+  return n
+}
+
 const PG = {
   host: process.env.PGHOST || 'localhost',
-  port: parseInt(process.env.PGPORT || '5433', 10),
+  port: pgPort(),
   user: process.env.PGUSER || 'portal',
   password: process.env.PGPASSWORD || 'portal',
   database: process.env.PGDATABASE || 'api_portal'
