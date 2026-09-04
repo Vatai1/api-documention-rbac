@@ -39,7 +39,7 @@ const PORT = (() => {
 })()
 
 // ── Хранилище: PostgreSQL ──
-function pgPort(defaultPort = 5433) {
+function pgPort(defaultPort = 5432) {
   const raw = process.env.PGPORT
   if (raw === undefined || raw === '') return defaultPort
   const n = parseInt(raw, 10)
