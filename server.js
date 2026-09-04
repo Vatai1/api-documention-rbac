@@ -31,6 +31,14 @@ function loadEnvFile() {
 }
 loadEnvFile()
 
+// Версия приложения (из package.json; переопределяется через APP_VERSION)
+const VERSION = (() => {
+  if (process.env.APP_VERSION) return process.env.APP_VERSION
+  try {
+    return JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8')).version || 'unknown'
+  } catch { return 'unknown' }
+})()
+
 const SECRET = process.env.PORTAL_SECRET || 'eks-portal-secret-2025-dev'
 const PORT = (() => {
   const n = parseInt(process.env.PORT || '3010', 10)
@@ -275,6 +283,7 @@ function seed() {
 }
 
 // ── Старт: база → схема → загрузка из PG → (первый запуск) ──
+console.log(`📦 API Портал v${VERSION} — запуск...`)
 await ensureDatabase()
 await initSchema()
 let db = await loadFromPg()
@@ -1083,6 +1092,6 @@ if (existsSync(DIST_DIR)) {
 
 // ── Старт ──
 app.listen(PORT, () => {
-  console.log(`🚀 API Портал сервер: http://localhost:${PORT}`)
+  console.log(`🚀 API Портал v${VERSION} — http://localhost:${PORT}`)
   console.log(`   Фронтенд (vite):  http://localhost:5180`)
 })
