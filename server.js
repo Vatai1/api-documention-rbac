@@ -36,14 +36,32 @@ const SECRET = process.env.PORTAL_SECRET || 'eks-portal-secret-2025-dev'
 const PORT = parseInt(process.env.PORT || '3010', 10)
 
 // ── Хранилище: PostgreSQL ──
-const pool = new pg.Pool({
+const PG = {
   host: process.env.PGHOST || 'localhost',
   port: parseInt(process.env.PGPORT || '5433', 10),
   user: process.env.PGUSER || 'portal',
   password: process.env.PGPASSWORD || 'portal',
-  database: process.env.PGDATABASE || 'api_portal',
-  max: 5
-})
+  database: process.env.PGDATABASE || 'api_portal'
+}
+const pool = new pg.Pool({ ...PG, max: 5 })
+
+// Автосоздание базы при первом запуске (для внешнего PostgreSQL без POSTGRES_DB)
+async function ensureDatabase() {
+  const admin = new pg.Client({ ...PG, database: 'postgres' })
+  try {
+    await admin.connect()
+    const r = await admin.query('SELECT 1 FROM pg_database WHERE datname = $1', [PG.database])
+    if (r.rowCount === 0) {
+      const safeName = PG.database.replace(/"/g, '""')
+      await admin.query(`CREATE DATABASE "${safeName}"`)
+      console.log(`🗄 Создана база данных «${PG.database}»`)
+    }
+  } catch (e) {
+    console.warn(`Не удалось проверить/создать базу «${PG.database}»: ${e.message}`)
+  } finally {
+    await admin.end().catch(() => {})
+  }
+}
 
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS users (
@@ -297,7 +315,8 @@ function seed() {
   return db
 }
 
-// ── Старт: схема → загрузка из PG → (импорт API из data.json) → сидинг ──
+// ── Старт: база → схема → загрузка из PG → (импорт API из data.json) → сидинг ──
+await ensureDatabase()
 await initSchema()
 let db = await loadFromPg()
 if (db) {
