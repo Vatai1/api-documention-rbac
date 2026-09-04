@@ -21,7 +21,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm ci --omit=dev
-COPY server.js parse-docx.js data.json ./
+COPY server.js parse-docx.js ./
 COPY --from=build /app/dist ./dist
 EXPOSE 3010
 CMD ["node", "server.js"]

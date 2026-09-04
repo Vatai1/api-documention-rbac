@@ -1,8 +1,8 @@
 /**
  * Express-сервер API Портала.
- * Хранилище — PostgreSQL (Docker: api-portal-pg, localhost:5433, база api_portal).
+ * Хранилище — PostgreSQL (Docker: api-portal-pg, база api_portal).
  * Модель держится в памяти, после каждой мутации — полная синхронизация в PG (транзакция).
- * Первая миграция: данные из data.json импортируются автоматически.
+ * Весь контент создаётся через админку и хранится только в БД (без файлов-заготовок).
  * JWT-авторизация, RBAC. Первый запуск: пароль администратора устанавливается
  * при первом входе через экран первичной настройки (без демо-доступа).
  */
@@ -17,7 +17,6 @@ import { dirname, join } from 'path'
 import { readZipEntry, parseDocxSpec } from './parse-docx.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DATA_FILE = join(__dirname, 'data.json')
 
 // ── .env (без зависимостей) ──
 function loadEnvFile() {
@@ -209,12 +208,6 @@ async function syncToPg(db) {
   }
 }
 
-// Чтение старого файла (для первой миграции)
-function loadFileDb() {
-  if (!existsSync(DATA_FILE)) return null
-  try { return JSON.parse(readFileSync(DATA_FILE, 'utf-8')) } catch { return null }
-}
-
 function nextId(arr) {
   return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1
 }
@@ -261,7 +254,7 @@ function collectAncestorIds(api, fid, set) {
   return set
 }
 
-// ── Сидинг (первый запуск): админ без пароля (устанавливается при первом входе) ──
+// ── Первый запуск: админ без пароля, контент пуст (всё хранится только в БД) ──
 function pendingAdmin() {
   return {
     id: 1,
@@ -276,60 +269,12 @@ function pendingAdmin() {
 
 function seed() {
   const db = { users: [pendingAdmin()], apis: [], globalFolders: [], permissions: [] }
-
-  let spec = null
-  try {
-    const specPath = join(__dirname, 'openapi.json')
-    if (existsSync(specPath)) spec = JSON.parse(readFileSync(specPath, 'utf-8'))
-  } catch (e) {
-    console.error('Не удалось прочитать openapi.json:', e.message)
-  }
-
-  if (spec && spec.paths) {
-    // Группируем эндпоинты по тегам
-    const groups = {}
-    for (const [path, methods] of Object.entries(spec.paths)) {
-      for (const [method, detail] of Object.entries(methods)) {
-        if (!['get','post','put','delete','patch'].includes(method)) continue
-        const tags = detail.tags || ['Без категории']
-        for (const tag of tags) {
-          if (!groups[tag]) groups[tag] = []
-          groups[tag].push({
-            id: nextId(Object.values(groups).flat()),
-            method: method.toUpperCase(),
-            path,
-            summary: detail.summary || '',
-            description: detail.description || '',
-            operationId: detail.operationId || '',
-            parameters: detail.parameters || [],
-            requestBody: detail.requestBody || null,
-            responses: detail.responses || {}
-          })
-        }
-      }
-    }
-
-    const api = {
-      id: 1,
-      name: 'eks-api-2025',
-      title: spec.info?.title || 'API',
-      version: spec.info?.version || '1.0',
-      description: spec.info?.description || '',
-      server_url: spec.servers?.[0]?.url || '',
-      swagger_url: '/eks-api-swagger-2025.html',
-      groups: groups,
-      created_at: new Date().toISOString()
-    }
-    migrateApi(api)
-    db.apis.push(api)
-  }
-
   saveDB(db)
-  console.log(`✅ Сидинг: админ без пароля (установите при первом входе), ${db.apis.length} API`)
+  console.log('✅ Первый запуск: создан администратор без пароля (установите при первом входе)')
   return db
 }
 
-// ── Старт: база → схема → загрузка из PG → (импорт API из data.json) → сидинг ──
+// ── Старт: база → схема → загрузка из PG → (первый запуск) ──
 await ensureDatabase()
 await initSchema()
 let db = await loadFromPg()
@@ -348,23 +293,8 @@ if (db) {
     console.log('🔑 Обнаружен демо-пароль администратора — сброшен, установите новый при первом входе')
   }
 } else {
-  const fileDb = loadFileDb()
-  if (fileDb && (fileDb.apis?.length || fileDb.users?.length)) {
-    // Импортируем контент (API, папки); пользователи не переносятся —
-    // админ создаётся без пароля и настраивается при первом входе
-    db = {
-      users: [pendingAdmin()],
-      apis: fileDb.apis || [],
-      globalFolders: fileDb.globalFolders || [],
-      permissions: []
-    }
-    for (const api of db.apis) migrateApi(api)
-    saveDB(db)
-    console.log(`📦 Импорт из data.json → PostgreSQL: ${db.apis.length} API (пользователи не переносятся)`)
-  } else {
-    console.log('База пуста — выполняю сидинг...')
-    db = seed()
-  }
+  console.log('База пуста — первый запуск...')
+  db = seed()
 }
 // Миграция старого формата groups → folders/endpoints
 let migrated = false

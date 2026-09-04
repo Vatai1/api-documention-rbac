@@ -3,5 +3,7 @@ dist/
 server.log
 .env
 corp-ca.pem
+data.json
+openapi.json
 *.log
 .DS_Store
